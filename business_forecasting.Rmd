@@ -179,10 +179,13 @@ fin_data_ac_rev_bus <- fin_data %>% filter(Category == 'Actuals' & Metric == 'Re
 fin_data_ac_rev_bus %>%
   plot_time_series(Date, Value, .smooth = FALSE, 
                    .facet_scales = "free",
-                   .title = "Business Revenue (Actuals)" )  
+                   .title = "Business Revenue (Actuals)" )  %>% layout(autosize = F)
+
+
 
 
 ```
+
 
 
 By the middle of 2020, our revenue trend seems to be stabilized, compared to the previous years. Also, the revenue had been decreasing from the middle of 2017 to the middle of 2020 in about **27.6 %** :
@@ -212,9 +215,16 @@ fin_data_rev_bus <- fin_data %>% filter(Category %in% c('Actuals', 'Forecast') &
 
 fin_data_rev_bus %>% ungroup() %>%
   plot_time_series(Date, Value, .color_var = Category, .smooth = FALSE,
-                   .title = "Business Revenue (Actuals vs Forecast)")
+                   .title = "Business Revenue (Actuals vs Forecast)") %>% layout(autosize = F)
+
+
+
 
 ```
+
+
+
+
 
 Clearly we can see a gap of 3% between the actual value and the forecasted value by the end of September 2021. 
 
@@ -223,9 +233,15 @@ Clearly we can see a gap of 3% between the actual value and the forecasted value
 fin_data_rev_bus %>% filter_by_time(.date_var = Date, 
                                                   .start_date = '2021-06-30', .end_date = '2021-09-30') %>% ungroup() %>% 
   plot_time_series(Date, Value, .color_var = Category, .smooth = FALSE,
-                   .title = "Business Revenue (Actuals vs Forecast)")
+                   .title = "Business Revenue (Actuals vs Forecast)") %>% layout(autosize = F)
+
+
+
 
 ```
+
+
+
 
 Despite giving us a good result, there is a lot we can improve. For instance, the model doesn't seem to capture and follow the current trend pretty well. Due to other external variables and other systematic events that we cannot control, the errors are pretty high. We can come up with a model to asses if we can capture these errors and try to follow the pattern using this historical data.  
 
@@ -233,7 +249,10 @@ Despite giving us a good result, there is a lot we can improve. For instance, th
 
 ```{r echo=T, message=FALSE, warning=FALSE}
 fin_data_ac_rev_bus %>% plot_acf_diagnostics(Value, log_interval_vec(Value, offset = 1000000),
-                                           .lags = 100)  
+                                           .lags = 100) %>% layout(autosize = F)  
+
+
+
 
 ```
 
@@ -247,7 +266,7 @@ After executing some correlation analysis, we can spot some seasonality on the P
 fin_data_ac_rev_bus %>%
   plot_stl_diagnostics(Date, log_interval_vec(Value, offset = 1000000), 
                        .facet_scales = "free_y",
-                       .feature_set = c( "observed", "season", "trend", "remainder"))
+                       .feature_set = c( "observed", "season", "trend", "remainder")) %>% layout(autosize = F)
 
 ```
 
@@ -267,7 +286,8 @@ More importantly, a better way to understand the seasonality is to plot the actu
 fin_data_ac_rev_bus %>% 
 
   plot_seasonal_diagnostics(Date, log_interval_vec(Value, offset = 1000000),
-                            .feature_set = "year") 
+                            .feature_set = "year") %>% layout(autosize = F)
+
 
 ```
 
@@ -281,7 +301,10 @@ fin_data_ac_rev_bus %>%
 fin_data_ac_rev_bus %>% 
 
   plot_seasonal_diagnostics(Date, log_interval_vec(Value, offset = 1000000),
-                            .feature_set = "month.lbl") 
+                            .feature_set = "month.lbl") %>% layout(autosize = F)
+
+
+
 
 
 ```
@@ -366,8 +389,7 @@ Before training a model, we need to split the data into two parts:
 splits <- time_series_split(data_prepared_tbl, assess = 12, skip = 12, cumulative = TRUE)
 
 splits %>%
-  tk_time_series_cv_plan() %>%
-  plot_time_series_cv_plan(Date, value_trans)
+  tk_time_series_cv_plan() 
 
 # New cleaned version of the data:
 
@@ -551,7 +573,7 @@ set.seed(123)
 resamples_kfold <- train_cleaned %>% vfold_cv(v = 5)  
 resamples_kfold %>%
   tk_time_series_cv_plan() %>%
-  plot_time_series_cv_plan(Date, value_trans, .facet_ncol = 2)
+  plot_time_series_cv_plan(Date, value_trans, .facet_ncol = 2) %>% layout(autosize = F)
 
 cell_folds <- vfold_cv(train_cleaned)
 
@@ -654,7 +676,10 @@ calibration_tbl %>%
     .conf_interval_show = FALSE,
     .interactive        = TRUE, 
     .title = "Forecasting Model Assessment"
-  )
+  ) %>% layout(autosize = F)
+
+
+
 
 ```
 
@@ -692,7 +717,11 @@ forecast_test_tbl %>%
     .conf_interval_show = FALSE,
     .interactive        = TRUE, 
     .title = "Forecasting Model Assessment"
-  )
+  ) %>% layout(autosize = F)
+
+
+
+
 
 ```
 
@@ -709,7 +738,7 @@ forecast_test_tbl %>%
   filter_by_time(.date_var = Date, .start_date = '2021-01-01', .end_date = '2021-09-30') %>%
   plot_modeltime_forecast(
     .facet_ncol = 4, .title = "Forecasting Model Assessment (Year 2021)"
-  )
+  ) %>% layout(autosize = F)
 
 ```
 
@@ -744,7 +773,7 @@ table_forecast_metrics_ggplot <- table_forecast_metrics %>%
   theme_ipsum() +
   ylab("Actuals ($revenue)")
 
-ggplotly(table_forecast_metrics_ggplot)
+ggplotly(table_forecast_metrics_ggplot) %>% layout(autosize = F)
 
 
 ```
@@ -761,7 +790,7 @@ table_forecast_metrics_ggplot <- table_forecast_metrics %>%
   theme_ipsum() +
   ylab("Actuals ($revenue)")
 
-ggplotly(table_forecast_metrics_ggplot)
+ggplotly(table_forecast_metrics_ggplot) %>% layout(autosize = F)
 
 
 ```
@@ -797,7 +826,7 @@ modeltime_forecast_tbl %>%
     .conf_interval_show = FALSE,
     .interactive        = TRUE, 
     .title = "Forecasting Models Assessment"
-  )
+  ) %>% layout(autosize = F)
 
 
 ```
@@ -815,6 +844,9 @@ table_forecast_metrics %>% filter_by_time(.date_var = Date, .start_date = '2021-
     estimate   = .value,
     metric_set = metric_set(mae, rmse)
   )
+
+
+
 
 ```
 
@@ -865,7 +897,7 @@ forecast_ensemble_test_tbl <- model_ensemble_tbl %>%
 forecast_ensemble_test_tbl %>%
   plot_modeltime_forecast(
     .facet_ncol = 4, .title = "Ensemble Model (NNET + XGBOOST ARIMA)"
-  )
+  ) %>% layout(autosize = F)
 
 ```
 
@@ -888,7 +920,11 @@ table_forecast_ensemble_metrics_ggplot <- table_forecast_ensemble_metrics %>%
   theme_ipsum() +
   ylab("Revenue (Actuals)")
 
-ggplotly(table_forecast_ensemble_metrics_ggplot)
+ggplotly(table_forecast_ensemble_metrics_ggplot) %>% layout(autosize = F)
+
+
+
+
 ```
 
 We can clearly see that our **ENSEMBLE MODEL** is a better approach, compared to the traditional method.
